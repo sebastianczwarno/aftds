@@ -4,9 +4,9 @@ import com.googlecode.cqengine.attribute.Attribute;
 import com.googlecode.cqengine.attribute.SimpleAttribute;
 import com.googlecode.cqengine.query.option.QueryOptions;
 import com.sc.aftds.excel.Column;
-import com.sc.aftds.excel.FileLoader;
 import com.sc.aftds.excel.RowCell;
 import com.sc.aftds.excel.Sex;
+import io.vavr.control.Option;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +15,6 @@ import org.apache.poi.ss.usermodel.Row;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 public class Unit {
     private static final Logger logger = LogManager.getLogger(Unit.class);
@@ -74,17 +73,17 @@ public class Unit {
         );
     }
 
-    public static Optional<Unit> createOptionalUnitFromExcelRow(Row row) {
-        var optionalId = RowCell.get(Column.Id, row, Cell::getNumericCellValue);
+    public static Option<Unit> createOptionalUnitFromExcelRow(Row row) {
+        var optionalId = RowCell.get(Column.Id, row, Cell::getNumericCellValue).map(Double::intValue);
 
         if (optionalId.isEmpty()) {
             var rowNumber = row.getRowNum() + 1;
             logger.error("Missing id on excel row=" + rowNumber);
-            return Optional.empty();
+            return Option.none();
         }
 
-        var optionalFatherId = RowCell.get(Column.FatherId, row, Unit::getCellNumericValue);
-        var optionalMotherId = RowCell.get(Column.MotherId, row, Unit::getCellNumericValue);
+        var optionalFatherId = RowCell.get(Column.FatherId, row, Unit::getCellNumericValue).map(Double::intValue);
+        var optionalMotherId = RowCell.get(Column.MotherId, row, Unit::getCellNumericValue).map(Double::intValue);
         var optionalSex = RowCell.get(Column.Sex, row, (cell) ->
                 cell.getNumericCellValue() == Sex.Male.Val ? Sex.Male : Sex.Female);
         var optionalName = RowCell.get(Column.Name, row, Cell::getStringCellValue);
@@ -115,17 +114,17 @@ public class Unit {
 
 
 
-        return Optional.of(new Unit(
-                optionalId.map(Double::intValue).get(),
-                optionalFatherId.map(Double::intValue).orElse(0),
-                optionalMotherId.map(Double::intValue).orElse(0),
-                optionalBirthDate.orElse(LocalDate.EPOCH),
-                optionalName.orElse(StringUtils.EMPTY),
-                optionalSex.get(),
-                optionalEms.orElse(StringUtils.EMPTY),
-                optionalPawPeds.orElse(StringUtils.EMPTY),
-                optionalPl.orElse(false),
-                optionalRu.orElse(false)));
+        return Option.of(new Unit(
+                optionalId.getOrElse(0),
+                optionalFatherId.getOrElse(0),
+                optionalMotherId.getOrElse(0),
+                optionalBirthDate.getOrElse(LocalDate.EPOCH),
+                optionalName.getOrElse(StringUtils.EMPTY),
+                optionalSex.getOrElse(Sex.Female),
+                optionalEms.getOrElse(StringUtils.EMPTY),
+                optionalPawPeds.getOrElse(StringUtils.EMPTY),
+                optionalPl.getOrElse(false),
+                optionalRu.getOrElse(false)));
     }
 
     public static final Attribute<Unit, Integer> UNIT_ID = new SimpleAttribute<Unit, Integer>("id") {

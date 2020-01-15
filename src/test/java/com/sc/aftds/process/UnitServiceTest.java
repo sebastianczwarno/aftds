@@ -29,17 +29,24 @@ public class UnitServiceTest {
     }
 
     @Test
-    public void testFindParentOfAChild() {
+    public void testFindParentById() {
         var children = unitService.findChildrenWithDefinedBirthDates(Unit.UNIT_FATHER_ID, 89041);
-        var child = children.stream().findFirst();
-        child.ifPresent(c -> unitService.findParentOfAChild(c.fatherId).ifPresent(p ->
+        unitService.findParentById(children.last().fatherId).peek(p ->
             Assertions.assertEquals(89041, p.id)
-        ));
+        );
     }
 
     @Test
-    public void testFindAllUnitWithBirthDateUndefined() {
-        var list = unitService.findAllUnitWithBirthDateUndefined();
+    public void testFindAllUnitsWithBirthDateUndefined() {
+        var list = unitService.findAllUnitsWithBirthDateUndefined();
         Assertions.assertFalse(list.isEmpty());
+    }
+
+    @Test
+    public void testFindParentsOfChild() {
+        var children = unitService.findChildrenWithDefinedBirthDates(Unit.UNIT_FATHER_ID, 89041);
+        var result = unitService.findParentsOfChild(children.last());
+        Assertions.assertNotNull(result._1);
+        Assertions.assertNotNull(result._2);
     }
 }

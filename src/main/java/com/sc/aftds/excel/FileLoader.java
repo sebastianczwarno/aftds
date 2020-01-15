@@ -34,14 +34,14 @@ public class FileLoader {
             sheet.forEach(row -> {
                 var unit = Unit.createOptionalUnitFromExcelRow(row);
                 var rowNum = row.getRowNum() + 1;
-                unit.ifPresentOrElse(u -> {
+                unit.peek(u -> {
                     if (idSet.contains(u.id)) {
                         logger.error("Duplicated id detected " + u.id);
                     } else {
                         idSet.add(u.id);
                         _unitEngine.transactionalIndexedCollection.add(u);
                     }
-                }, () -> logger.error("Incorrect data on row number " + rowNum));
+                }).onEmpty(() -> logger.error("Incorrect data on row number " + rowNum));
             });
         }
         logger.debug("Loaded " + idSet.size() + " items.");
