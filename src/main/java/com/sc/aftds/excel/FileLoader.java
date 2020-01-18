@@ -1,5 +1,6 @@
 package com.sc.aftds.excel;
 
+import com.sc.aftds.unit.IUnitEngine;
 import com.sc.aftds.unit.UnitModel;
 
 import com.sc.aftds.unit.UnitEngine;
@@ -18,9 +19,9 @@ public class FileLoader {
 
     private final Set<Integer> idSet = new HashSet<>();
     private final ExcelSheetPosition _excelSheetPosition;
-    private final UnitEngine _unitEngine;
+    private final IUnitEngine<UnitModel> _unitEngine;
 
-    public FileLoader(ExcelSheetPosition excelSheetPosition, UnitEngine unitEngine) {
+    public FileLoader(ExcelSheetPosition excelSheetPosition, IUnitEngine<UnitModel> unitEngine) {
         _excelSheetPosition = excelSheetPosition;
         _unitEngine = unitEngine;
     }

@@ -16,7 +16,7 @@ public class UnitServiceTest {
     @BeforeAll
     public static void setup() throws IOException {
         var file = new File("/home/sc/Documents/Baza_koty_30_12_2019.xlsx");
-        var unitEngine = new UnitEngine();
+        IUnitEngine<UnitModel> unitEngine = new UnitEngine(UnitModel.class);
         var fileLoader = new FileLoader(new ExcelSheetPosition(3), unitEngine);
         fileLoader.loadIntoEngine(file);
         unitService = new UnitService(unitEngine);

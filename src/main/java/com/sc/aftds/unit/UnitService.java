@@ -20,7 +20,7 @@ public class UnitService implements IUnitService {
 
     private final IUnitEngine<UnitModel> unitEngine;
 
-    public UnitService(UnitEngine unitEngine) {
+    public UnitService(IUnitEngine<UnitModel> unitEngine) {
         this.unitEngine = unitEngine;
     }
 

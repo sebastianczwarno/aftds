@@ -7,10 +7,10 @@ import com.googlecode.cqengine.query.option.QueryOptions;
 import com.googlecode.cqengine.resultset.ResultSet;
 
 public class UnitEngine implements IUnitEngine<UnitModel> {
-    private final TransactionalIndexedCollection transactionalIndexedCollection;
+    private final TransactionalIndexedCollection<UnitModel> transactionalIndexedCollection;
 
-    public UnitEngine() {
-        transactionalIndexedCollection = new TransactionalIndexedCollection(UnitModel.class);
+    public UnitEngine(Class<UnitModel> type) {
+        transactionalIndexedCollection = new TransactionalIndexedCollection<>(type);
         transactionalIndexedCollection.addIndex(NavigableIndex.onAttribute(UnitModel.UNIT_FATHER_ID));
         transactionalIndexedCollection.addIndex(NavigableIndex.onAttribute(UnitModel.UNIT_MOTHER_ID));
     }
