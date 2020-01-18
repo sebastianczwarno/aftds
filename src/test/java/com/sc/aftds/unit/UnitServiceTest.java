@@ -1,4 +1,4 @@
-package com.sc.aftds.process;
+package com.sc.aftds.unit;
 
 import com.sc.aftds.excel.ExcelSheetPosition;
 import com.sc.aftds.excel.FileLoader;
@@ -23,30 +23,37 @@ public class UnitServiceTest {
     }
 
     @Test
-    public void testFindChildrenWithDefinedBirthDates() {
-        var children = unitService.findChildrenWithDefinedBirthDates(Unit.UNIT_FATHER_ID, 89041);
+    public void test_find_children_with_defined_birth_dates() {
+        var children = unitService.findChildrenWithDefinedBirthDates(UnitModel.UNIT_FATHER_ID, 89041);
         Assertions.assertFalse(children.isEmpty());
     }
 
     @Test
-    public void testFindParentById() {
-        var children = unitService.findChildrenWithDefinedBirthDates(Unit.UNIT_FATHER_ID, 89041);
-        unitService.findParentById(children.last().fatherId).peek(p ->
-            Assertions.assertEquals(89041, p.id)
+    public void test_find_unit_by_id() {
+        var children = unitService.findChildrenWithDefinedBirthDates(UnitModel.UNIT_FATHER_ID, 89041);
+        unitService.findUnitById(children.last().fatherId).peek(p ->
+                Assertions.assertEquals(89041, p.id)
         );
     }
 
     @Test
-    public void testFindAllUnitsWithBirthDateUndefined() {
+    public void test_find_all_units_with_birth_date_undefined() {
         var list = unitService.findAllUnitsWithBirthDateUndefined();
         Assertions.assertFalse(list.isEmpty());
     }
 
     @Test
-    public void testFindParentsOfChild() {
-        var children = unitService.findChildrenWithDefinedBirthDates(Unit.UNIT_FATHER_ID, 89041);
+    public void test_find_parents_of_child() {
+        var children = unitService.findChildrenWithDefinedBirthDates(UnitModel.UNIT_FATHER_ID, 89041);
         var result = unitService.findParentsOfChild(children.last());
-        Assertions.assertNotNull(result._1);
-        Assertions.assertNotNull(result._2);
+        Assertions.assertFalse(result.isEmpty());
+    }
+
+    @Test
+    public void test_process() {
+        var before = unitService.findAllUnitsWithBirthDateUndefined().size();
+        unitService.process();
+        var after = unitService.findAllUnitsWithBirthDateUndefined().size();
+        Assertions.assertTrue(before > after);
     }
 }

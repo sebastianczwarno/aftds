@@ -1,8 +1,8 @@
 package com.sc.aftds.excel;
 
-import com.sc.aftds.process.Unit;
+import com.sc.aftds.unit.UnitModel;
 
-import com.sc.aftds.process.UnitEngine;
+import com.sc.aftds.unit.UnitEngine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -32,14 +32,14 @@ public class FileLoader {
             var titleRow = sheet.getRow(0);
             sheet.removeRow(titleRow);
             sheet.forEach(row -> {
-                var unit = Unit.createOptionalUnitFromExcelRow(row);
+                var unit = UnitModel.createOptionalUnitFromExcelRow(row);
                 var rowNum = row.getRowNum() + 1;
                 unit.peek(u -> {
                     if (idSet.contains(u.id)) {
                         logger.error("Duplicated id detected " + u.id);
                     } else {
                         idSet.add(u.id);
-                        _unitEngine.transactionalIndexedCollection.add(u);
+                        _unitEngine.add(u);
                     }
                 }).onEmpty(() -> logger.error("Incorrect data on row number " + rowNum));
             });

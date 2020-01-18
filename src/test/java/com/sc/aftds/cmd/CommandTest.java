@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 public class CommandTest {
 
     @Test
-    public void parseTest() throws ParseException {
+    public void test_parse() throws ParseException {
         var cmd = new Command();
         var input = new String[]{"-f /home/sc/Documents/Baza_koty_30_12_2019.xlsx", "-p 5", "-t 4"};
         var result = cmd.parse(input);

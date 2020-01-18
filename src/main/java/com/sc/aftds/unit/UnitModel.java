@@ -1,4 +1,4 @@
-package com.sc.aftds.process;
+package com.sc.aftds.unit;
 
 import com.googlecode.cqengine.attribute.Attribute;
 import com.googlecode.cqengine.attribute.SimpleAttribute;
@@ -16,8 +16,8 @@ import org.apache.poi.ss.usermodel.Row;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-public class Unit {
-    private static final Logger logger = LogManager.getLogger(Unit.class);
+public class UnitModel {
+    private static final Logger logger = LogManager.getLogger(UnitModel.class);
 
     public final int id;
     public final int fatherId;
@@ -30,7 +30,7 @@ public class Unit {
     public final boolean pl;
     public final boolean ru;
 
-    public Unit(
+    public UnitModel(
             int id,
             int fatherId,
             int motherId,
@@ -58,22 +58,22 @@ public class Unit {
         return "Unit{id=" + id + ", fatherId=" + fatherId + ", motherId=" + motherId + ", birthDate=" + birthDate + "}";
     }
 
-    public static Unit copy(Unit unit, LocalDate birthDate) {
-        return new Unit(
-                unit.id,
-                unit.fatherId,
-                unit.motherId,
+    public UnitModel copy(LocalDate birthDate) {
+        return new UnitModel(
+                this.id,
+                this.fatherId,
+                this.motherId,
                 birthDate,
-                unit.name,
-                unit.sex,
-                unit.ems,
-                unit.pawPeds,
-                unit.pl,
-                unit.ru
+                this.name,
+                this.sex,
+                this.ems,
+                this.pawPeds,
+                this.pl,
+                this.ru
         );
     }
 
-    public static Option<Unit> createOptionalUnitFromExcelRow(Row row) {
+    public static Option<UnitModel> createOptionalUnitFromExcelRow(Row row) {
         var optionalId = RowCell.get(Column.Id, row, Cell::getNumericCellValue).map(Double::intValue);
 
         if (optionalId.isEmpty()) {
@@ -82,8 +82,8 @@ public class Unit {
             return Option.none();
         }
 
-        var optionalFatherId = RowCell.get(Column.FatherId, row, Unit::getCellNumericValue).map(Double::intValue);
-        var optionalMotherId = RowCell.get(Column.MotherId, row, Unit::getCellNumericValue).map(Double::intValue);
+        var optionalFatherId = RowCell.get(Column.FatherId, row, UnitModel::getCellNumericValue).map(Double::intValue);
+        var optionalMotherId = RowCell.get(Column.MotherId, row, UnitModel::getCellNumericValue).map(Double::intValue);
         var optionalSex = RowCell.get(Column.Sex, row, (cell) ->
                 cell.getNumericCellValue() == Sex.Male.Val ? Sex.Male : Sex.Female);
         var optionalName = RowCell.get(Column.Name, row, Cell::getStringCellValue);
@@ -114,40 +114,40 @@ public class Unit {
 
 
 
-        return Option.of(new Unit(
+        return Option.of(new UnitModel(
                 optionalId.getOrElse(0),
                 optionalFatherId.getOrElse(0),
                 optionalMotherId.getOrElse(0),
                 optionalBirthDate.getOrElse(LocalDate.EPOCH),
                 optionalName.getOrElse(StringUtils.EMPTY),
-                optionalSex.getOrElse(Sex.Female),
+                optionalSex.getOrElse(Sex.Undefined),
                 optionalEms.getOrElse(StringUtils.EMPTY),
                 optionalPawPeds.getOrElse(StringUtils.EMPTY),
                 optionalPl.getOrElse(false),
                 optionalRu.getOrElse(false)));
     }
 
-    public static final Attribute<Unit, Integer> UNIT_ID = new SimpleAttribute<Unit, Integer>("id") {
-        public Integer getValue(Unit unit, QueryOptions queryOptions) {
-            return unit.id;
+    public static final Attribute<UnitModel, Integer> UNIT_ID = new SimpleAttribute<UnitModel, Integer>("id") {
+        public Integer getValue(UnitModel unitModel, QueryOptions queryOptions) {
+            return unitModel.id;
         }
     };
 
-    public static final Attribute<Unit, Integer> UNIT_FATHER_ID = new SimpleAttribute<Unit, Integer>("fatherId") {
-        public Integer getValue(Unit unit, QueryOptions queryOptions) {
-            return unit.fatherId;
+    public static final Attribute<UnitModel, Integer> UNIT_FATHER_ID = new SimpleAttribute<UnitModel, Integer>("fatherId") {
+        public Integer getValue(UnitModel unitModel, QueryOptions queryOptions) {
+            return unitModel.fatherId;
         }
     };
 
-    public static final Attribute<Unit, Integer> UNIT_MOTHER_ID = new SimpleAttribute<Unit, Integer>("motherId") {
-        public Integer getValue(Unit unit, QueryOptions queryOptions) {
-            return unit.motherId;
+    public static final Attribute<UnitModel, Integer> UNIT_MOTHER_ID = new SimpleAttribute<UnitModel, Integer>("motherId") {
+        public Integer getValue(UnitModel unitModel, QueryOptions queryOptions) {
+            return unitModel.motherId;
         }
     };
 
-    public static final Attribute<Unit, LocalDate> UNIT_BIRTH_DATE = new SimpleAttribute<Unit, LocalDate>("birthDate") {
-        public LocalDate getValue(Unit unit, QueryOptions queryOptions) {
-            return unit.birthDate;
+    public static final Attribute<UnitModel, LocalDate> UNIT_BIRTH_DATE = new SimpleAttribute<UnitModel, LocalDate>("birthDate") {
+        public LocalDate getValue(UnitModel unitModel, QueryOptions queryOptions) {
+            return unitModel.birthDate;
         }
     };
 
