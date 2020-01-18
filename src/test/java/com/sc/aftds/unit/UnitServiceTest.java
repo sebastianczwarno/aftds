@@ -1,12 +1,12 @@
 package com.sc.aftds.unit;
 
-import com.sc.aftds.excel.ExcelSheetPosition;
+import com.sc.aftds.cmd.Command;
 import com.sc.aftds.excel.FileLoader;
+import org.apache.commons.cli.ParseException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 
 public class UnitServiceTest {
@@ -14,12 +14,13 @@ public class UnitServiceTest {
     private static UnitService unitService;
 
     @BeforeAll
-    public static void setup() throws IOException {
-        var file = new File("/home/sc/Documents/Baza_koty_30_12_2019.xlsx");
+    public static void setup() throws IOException, ParseException {
+        var command = new Command(new String[]{"-f /home/sc/Documents/Baza_koty_30_12_2019.xlsx", "-p 3"});
+        Assertions.assertTrue(command.getFile().exists());
         IUnitEngine<UnitModel> unitEngine = new UnitEngine(UnitModel.class);
-        var fileLoader = new FileLoader(new ExcelSheetPosition(3), unitEngine);
-        fileLoader.loadIntoEngine(file);
-        unitService = new UnitService(unitEngine);
+        var fileLoader = new FileLoader(command, unitEngine);
+        fileLoader.loadIntoEngine();
+        unitService = new UnitService(unitEngine, command);
     }
 
     @Test

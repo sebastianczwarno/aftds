@@ -1,6 +1,7 @@
 package com.sc.aftds.unit;
 
 import com.googlecode.cqengine.attribute.Attribute;
+import com.sc.aftds.cmd.Command;
 import com.sc.aftds.excel.Sex;
 import io.vavr.collection.List;
 import io.vavr.control.Option;
@@ -18,29 +19,32 @@ import static com.googlecode.cqengine.query.QueryFactory.*;
 public class UnitService implements IUnitService {
     private static final Logger logger = LogManager.getLogger(UnitService.class);
 
-    private final IUnitEngine<UnitModel> unitEngine;
+    private final IUnitEngine<UnitModel> _unitEngine;
+    private final Command _command;
 
-    public UnitService(IUnitEngine<UnitModel> unitEngine) {
-        this.unitEngine = unitEngine;
+    public UnitService(IUnitEngine<UnitModel> unitEngine, Command command)
+    {
+        _unitEngine = unitEngine;
+        _command = command;
     }
 
     public Map<Integer, UnitModel> findAllUnitsWithBirthDateUndefined() {
         var query = equal(UnitModel.UNIT_BIRTH_DATE, LocalDate.EPOCH);
-        try (var resultSet = unitEngine.retrieve(query)) {
+        try (var resultSet = _unitEngine.retrieve(query)) {
             return resultSet.stream().collect(Collectors.toMap(u -> u.id, u -> u));
         }
     }
 
     public Option<UnitModel> findUnitById(int parentId) {
         var query = equal(UnitModel.UNIT_ID, parentId);
-        try (var resultSet = unitEngine.retrieve(query)) {
+        try (var resultSet = _unitEngine.retrieve(query)) {
             return Option.ofOptional(resultSet.stream().findFirst());
         }
     }
 
     public Set<UnitModel> findParentsOfChild(UnitModel child) {
         var query = or(equal(UnitModel.UNIT_ID, child.fatherId), equal(UnitModel.UNIT_ID, child.motherId));
-        try (var resultSet = unitEngine.retrieve(query)) {
+        try (var resultSet = _unitEngine.retrieve(query)) {
             return resultSet.stream().collect(Collectors.toUnmodifiableSet());
         }
     }
@@ -48,7 +52,7 @@ public class UnitService implements IUnitService {
     public List<UnitModel> findChildrenWithDefinedBirthDates(Attribute<UnitModel, Integer> attribute, int unitId) {
         var query = and(equal(attribute, unitId), not(equal(UnitModel.UNIT_BIRTH_DATE, LocalDate.EPOCH)));
         var options = orderBy((ascending(UnitModel.UNIT_BIRTH_DATE)));
-        try (var resultSet = unitEngine.retrieve(query, queryOptions(options))) {
+        try (var resultSet = _unitEngine.retrieve(query, queryOptions(options))) {
             var result = List.ofAll(resultSet.stream());
             return result;
         }
@@ -66,15 +70,12 @@ public class UnitService implements IUnitService {
             unitOptionByParents.peek(u -> {
                 replaceUnitWithNewOneAndReduce(unit, u, unitsWithBirthDateUndefined);
             }).onEmpty(() -> {
-                logger.warn("Parents of " + unit + " have birth dates undefined");
-
                 var children = unit.sex == Sex.Female ?
                         findChildrenWithDefinedBirthDates(UnitModel.UNIT_MOTHER_ID, unit.id) :
                         findChildrenWithDefinedBirthDates(UnitModel.UNIT_FATHER_ID, unit.id);
 
                 if (parents.isEmpty() && children.isEmpty()) {
                     unitsWithBirthDateUndefined.remove(unit.id);
-                    logger.error("Missing parents and children for " + unit);
                 }
 
                 var unitOptionByChildren = defineBirthDateByOldestChild(unit, children);
@@ -116,12 +117,12 @@ public class UnitService implements IUnitService {
     }
 
     public LocalDate setBirthDateByChild(LocalDate birthDate) {
-        return birthDate.minusMonths(4);
+        return birthDate.minusMonths(_command.getTimeDistance());
     }
 
     private void replaceUnitWithNewOneAndReduce(UnitModel oldUnit, UnitModel newUnit, Map<Integer, UnitModel> unitMap) {
-        unitEngine.remove(oldUnit);
+        _unitEngine.remove(oldUnit);
         unitMap.remove(oldUnit.id);
-        unitEngine.add(newUnit);
+        _unitEngine.add(newUnit);
     }
 }

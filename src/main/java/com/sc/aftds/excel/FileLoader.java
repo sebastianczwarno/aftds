@@ -1,14 +1,12 @@
 package com.sc.aftds.excel;
 
+import com.sc.aftds.cmd.Command;
 import com.sc.aftds.unit.IUnitEngine;
 import com.sc.aftds.unit.UnitModel;
-
-import com.sc.aftds.unit.UnitEngine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashSet;
@@ -18,18 +16,18 @@ public class FileLoader {
     private static final Logger logger = LogManager.getLogger(FileLoader.class);
 
     private final Set<Integer> idSet = new HashSet<>();
-    private final ExcelSheetPosition _excelSheetPosition;
+    private final Command _command;
     private final IUnitEngine<UnitModel> _unitEngine;
 
-    public FileLoader(ExcelSheetPosition excelSheetPosition, IUnitEngine<UnitModel> unitEngine) {
-        _excelSheetPosition = excelSheetPosition;
+    public FileLoader(Command command, IUnitEngine<UnitModel> unitEngine) {
+        _command = command;
         _unitEngine = unitEngine;
     }
 
-    public void loadIntoEngine(File source) throws IOException {
-        try (var fileInputStream = new FileInputStream(source)) {
+    public void loadIntoEngine() throws IOException {
+        try (var fileInputStream = new FileInputStream(_command.getFile())) {
             var wb = new XSSFWorkbook(fileInputStream);
-            var sheet = wb.getSheetAt(_excelSheetPosition.Number);
+            var sheet = wb.getSheetAt(_command.getExcelSheetPosition().Number);
             var titleRow = sheet.getRow(0);
             sheet.removeRow(titleRow);
             sheet.forEach(row -> {
