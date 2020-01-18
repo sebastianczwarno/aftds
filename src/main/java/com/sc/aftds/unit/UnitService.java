@@ -64,9 +64,7 @@ public class UnitService implements IUnitService {
             var unitOptionByParents = defineBirthDateByParents(parents, unit);
 
             unitOptionByParents.peek(u -> {
-                unitEngine.remove(unit);
-                unitEngine.add(u);
-                unitsWithBirthDateUndefined.remove(u.id);
+                replaceUnitWithNewOneAndReduce(unit, u, unitsWithBirthDateUndefined);
             }).onEmpty(() -> {
                 logger.warn("Parents of " + unit + " have birth dates undefined");
 
@@ -82,9 +80,7 @@ public class UnitService implements IUnitService {
                 var unitOptionByChildren = defineBirthDateByOldestChild(unit, children);
 
                 unitOptionByChildren.peek(u -> {
-                    unitEngine.remove(unit);
-                    unitEngine.add(u);
-                    unitsWithBirthDateUndefined.remove(u.id);
+                    replaceUnitWithNewOneAndReduce(unit, u, unitsWithBirthDateUndefined);
                 }).onEmpty(() -> logger.warn("Failed to define birth date for " + unit));
             });
         }
@@ -121,5 +117,11 @@ public class UnitService implements IUnitService {
 
     public LocalDate setBirthDateByChild(LocalDate birthDate) {
         return birthDate.minusMonths(4);
+    }
+
+    private void replaceUnitWithNewOneAndReduce(UnitModel oldUnit, UnitModel newUnit, Map<Integer, UnitModel> unitMap) {
+        unitEngine.remove(oldUnit);
+        unitMap.remove(oldUnit.id);
+        unitEngine.add(newUnit);
     }
 }
