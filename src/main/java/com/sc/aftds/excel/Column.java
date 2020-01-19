@@ -1,20 +1,24 @@
 package com.sc.aftds.excel;
 
 public enum Column {
-    Id(0),
-    Name(1),
-    Sex(2),
-    BirthDate(3),
-    Ems(4),
-    FatherId(5),
-    MotherId(7),
-    PawPeds(9),
-    Pl(10),
-    Ru(11);
+    Id(0,0, "ID"),
+    Name(1,4, "Imię"),
+    Sex(2,5,"Płeć"),
+    BirthDate(3,1, "Data ur"),
+    Ems(4,6, "EMS"),
+    FatherId(5, 2,"Id_Ojciec"),
+    MotherId(7,3, "Id_Matka"),
+    PawPeds(9,7, "PawPeds"),
+    Pl(10,8, "PL"),
+    Ru(11,9, "RU");
 
-    public final int Val;
+    public final int PositionRead;
+    public final String Alias;
+    public final int PositionWrite;
 
-    Column(int val) {
-        Val = val;
+    Column(int positionRead, int positionWrite, String alias) {
+        PositionRead = positionRead;
+        PositionWrite = positionWrite;
+        Alias = alias;
     }
 }

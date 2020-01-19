@@ -22,8 +22,7 @@ public class UnitService implements IUnitService {
     private final IUnitEngine<UnitModel> _unitEngine;
     private final Command _command;
 
-    public UnitService(IUnitEngine<UnitModel> unitEngine, Command command)
-    {
+    public UnitService(IUnitEngine<UnitModel> unitEngine, Command command) {
         _unitEngine = unitEngine;
         _command = command;
     }

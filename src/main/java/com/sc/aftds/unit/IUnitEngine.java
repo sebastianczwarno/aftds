@@ -3,6 +3,7 @@ package com.sc.aftds.unit;
 import com.googlecode.cqengine.query.Query;
 import com.googlecode.cqengine.query.option.QueryOptions;
 import com.googlecode.cqengine.resultset.ResultSet;
+import io.vavr.collection.List;
 
 public interface IUnitEngine<O extends UnitModel> {
     ResultSet<O> retrieve(Query<O> query);
@@ -10,4 +11,5 @@ public interface IUnitEngine<O extends UnitModel> {
     boolean add(O o);
     boolean remove(O o);
     boolean isEmpty();
+    List<UnitModel> getAllUnitModels();
 }

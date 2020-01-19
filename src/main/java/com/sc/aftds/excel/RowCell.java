@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 public final class RowCell {
     public static <T> Option<T> get(Column column, Row row, Function<Cell, T> function) {
-        var cell = row.getCell(column.Val);
+        var cell = row.getCell(column.PositionRead);
         var optional = Option.of(cell);
         return optional.map(function);
     }

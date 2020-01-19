@@ -12,14 +12,14 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class FileLoader {
-    private static final Logger logger = LogManager.getLogger(FileLoader.class);
+public class ExcelFileLoader {
+    private static final Logger logger = LogManager.getLogger(ExcelFileLoader.class);
 
     private final Set<Integer> idSet = new HashSet<>();
     private final Command _command;
     private final IUnitEngine<UnitModel> _unitEngine;
 
-    public FileLoader(Command command, IUnitEngine<UnitModel> unitEngine) {
+    public ExcelFileLoader(Command command, IUnitEngine<UnitModel> unitEngine) {
         _command = command;
         _unitEngine = unitEngine;
     }

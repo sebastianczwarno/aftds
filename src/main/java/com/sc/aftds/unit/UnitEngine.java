@@ -5,12 +5,13 @@ import com.googlecode.cqengine.index.navigable.NavigableIndex;
 import com.googlecode.cqengine.query.Query;
 import com.googlecode.cqengine.query.option.QueryOptions;
 import com.googlecode.cqengine.resultset.ResultSet;
+import io.vavr.collection.List;
 
 public class UnitEngine implements IUnitEngine<UnitModel> {
     private final TransactionalIndexedCollection<UnitModel> transactionalIndexedCollection;
 
-    public UnitEngine(Class<UnitModel> type) {
-        transactionalIndexedCollection = new TransactionalIndexedCollection<>(type);
+    public UnitEngine() {
+        transactionalIndexedCollection = new TransactionalIndexedCollection<>(UnitModel.class);
         transactionalIndexedCollection.addIndex(NavigableIndex.onAttribute(UnitModel.UNIT_FATHER_ID));
         transactionalIndexedCollection.addIndex(NavigableIndex.onAttribute(UnitModel.UNIT_MOTHER_ID));
     }
@@ -40,5 +41,8 @@ public class UnitEngine implements IUnitEngine<UnitModel> {
         return transactionalIndexedCollection.isEmpty();
     }
 
-
+    @Override
+    public List<UnitModel> getAllUnitModels() {
+        return List.ofAll(transactionalIndexedCollection.stream());
+    }
 }
