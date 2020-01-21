@@ -21,7 +21,7 @@ public class AftdsApplication {
 		fileLoader.loadIntoEngine();
 		IUnitService unitService = new UnitService(unitEngine, command);
 		unitService.process();
-		IExcelFileWriter fileWriter = new ExcelFileWriter(unitEngine.getAllUnitModels());
+		IExcelFileWriter fileWriter = new ExcelFileWriter(unitEngine.getAllUnitModels(), unitService);
 		fileWriter.write();
 
 		logger.info("Application will close.");

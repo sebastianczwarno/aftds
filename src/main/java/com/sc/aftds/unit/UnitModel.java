@@ -15,8 +15,6 @@ import org.apache.poi.ss.usermodel.Row;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
-import java.util.function.Function;
 
 public class UnitModel {
     private static final Logger logger = LogManager.getLogger(UnitModel.class);
@@ -31,6 +29,7 @@ public class UnitModel {
     public final String pawPeds;
     public final boolean pl;
     public final boolean ru;
+    public final boolean modifiedByProgram;
 
     public UnitModel(
             int id,
@@ -42,7 +41,8 @@ public class UnitModel {
             String ems,
             String pawPeds,
             boolean pl,
-            boolean ru) {
+            boolean ru,
+            boolean modifiedByProgram) {
         this.id = id;
         this.fatherId = fatherId;
         this.motherId = motherId;
@@ -53,6 +53,7 @@ public class UnitModel {
         this.pawPeds = pawPeds;
         this.pl = pl;
         this.ru = ru;
+        this.modifiedByProgram = modifiedByProgram;
     }
 
     @Override
@@ -60,7 +61,7 @@ public class UnitModel {
         return "Unit{id=" + id + ", fatherId=" + fatherId + ", motherId=" + motherId + ", birthDate=" + birthDate + "}";
     }
 
-    public UnitModel copy(LocalDate birthDate) {
+    public UnitModel copy(LocalDate birthDate, boolean modifiedByProgram) {
         return new UnitModel(
                 this.id,
                 this.fatherId,
@@ -71,7 +72,8 @@ public class UnitModel {
                 this.ems,
                 this.pawPeds,
                 this.pl,
-                this.ru
+                this.ru,
+                modifiedByProgram
         );
     }
 
@@ -126,7 +128,8 @@ public class UnitModel {
                 optionalEms.getOrElse(StringUtils.EMPTY),
                 optionalPawPeds.getOrElse(StringUtils.EMPTY),
                 optionalPl.getOrElse(false),
-                optionalRu.getOrElse(false)));
+                optionalRu.getOrElse(false),
+                false));
     }
 
     public static final Attribute<UnitModel, Integer> UNIT_ID = new SimpleAttribute<UnitModel, Integer>("id") {

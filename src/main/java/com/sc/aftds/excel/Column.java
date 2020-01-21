@@ -2,15 +2,18 @@ package com.sc.aftds.excel;
 
 public enum Column {
     Id(0,0, "ID"),
-    Name(1,4, "Imię"),
-    Sex(2,5,"Płeć"),
-    BirthDate(3,1, "Data ur"),
-    Ems(4,6, "EMS"),
-    FatherId(5, 2,"Id_Ojciec"),
-    MotherId(7,3, "Id_Matka"),
-    PawPeds(9,7, "PawPeds"),
-    Pl(10,8, "PL"),
-    Ru(11,9, "RU");
+    Name(1,1, "Imię"),
+    BirthDate(3,2, "Data ur"),
+    FatherId(5, 3,"Id_Ojciec"),
+    FatherBirthDate(-1, 4,"Data Urodzenia Ojca"),
+    MotherId(7,5, "Id_Matka"),
+    MotherBirthDate(-1,6, "Data Urodzenia Matki"),
+    Sex(2,7,"Płeć"),
+    Ems(4,8, "EMS"),
+    PawPeds(9,9, "PawPeds"),
+    Pl(10,10, "PL"),
+    Ru(11,11, "RU"),
+    ModifiedByProgram(-1, 12, "Zmodyfikowane Przez Program");
 
     public final int PositionRead;
     public final String Alias;

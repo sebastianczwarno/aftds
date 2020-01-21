@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.googlecode.cqengine.query.QueryFactory.*;
@@ -41,19 +40,22 @@ public class UnitService implements IUnitService {
         }
     }
 
-    public Set<UnitModel> findParentsOfChild(UnitModel child) {
-        var query = or(equal(UnitModel.UNIT_ID, child.fatherId), equal(UnitModel.UNIT_ID, child.motherId));
-        try (var resultSet = _unitEngine.retrieve(query)) {
-            return resultSet.stream().collect(Collectors.toUnmodifiableSet());
+    public List<UnitModel> findParentsOfChild(UnitModel child) {
+        var query = or(
+                and(equal(UnitModel.UNIT_ID, child.fatherId), not(equal(UnitModel.UNIT_BIRTH_DATE, LocalDate.EPOCH))),
+                and(equal(UnitModel.UNIT_ID, child.motherId), not(equal(UnitModel.UNIT_BIRTH_DATE, LocalDate.EPOCH)))
+        );
+        var order = orderBy((descending(UnitModel.UNIT_BIRTH_DATE)));
+        try (var resultSet = _unitEngine.retrieve(query, queryOptions(order))) {
+            return List.ofAll(resultSet.stream());
         }
     }
 
     public List<UnitModel> findChildrenWithDefinedBirthDates(Attribute<UnitModel, Integer> attribute, int unitId) {
         var query = and(equal(attribute, unitId), not(equal(UnitModel.UNIT_BIRTH_DATE, LocalDate.EPOCH)));
-        var options = orderBy((ascending(UnitModel.UNIT_BIRTH_DATE)));
-        try (var resultSet = _unitEngine.retrieve(query, queryOptions(options))) {
-            var result = List.ofAll(resultSet.stream());
-            return result;
+        var order = orderBy((ascending(UnitModel.UNIT_BIRTH_DATE)));
+        try (var resultSet = _unitEngine.retrieve(query, queryOptions(order))) {
+            return List.ofAll(resultSet.stream());
         }
     }
 
@@ -73,46 +75,36 @@ public class UnitService implements IUnitService {
                         findChildrenWithDefinedBirthDates(UnitModel.UNIT_MOTHER_ID, unit.id) :
                         findChildrenWithDefinedBirthDates(UnitModel.UNIT_FATHER_ID, unit.id);
 
-                if (parents.isEmpty() && children.isEmpty()) {
-                    unitsWithBirthDateUndefined.remove(unit.id);
-                }
-
-                var unitOptionByChildren = defineBirthDateByOldestChild(unit, children);
+                var unitOptionByChildren = defineBirthDateByOldestChild(children, unit);
 
                 unitOptionByChildren.peek(u -> {
                     replaceUnitWithNewOneAndReduce(unit, u, unitsWithBirthDateUndefined);
-                }).onEmpty(() -> logger.warn("Failed to define birth date for " + unit));
+                }).onEmpty(() -> {
+                    unitsWithBirthDateUndefined.remove(unit.id);
+                    logger.warn("Failed to define birth date for " + unit);
+                });
             });
         }
     }
 
-    public Option<UnitModel> defineBirthDateByParents(Set<UnitModel> parents, UnitModel unit) {
-        var mother = parents.stream().filter(u -> u.id == unit.motherId).findFirst();
-        var father = parents.stream().filter(u -> u.id == unit.fatherId).findFirst();
-
-        if (mother.isPresent()) {
-            var computedBirthDate = setBirthDateByParent(mother.get().birthDate);
-            return Option.of(unit.copy(computedBirthDate));
+    public Option<UnitModel> defineBirthDateByParents(List<UnitModel> parents, UnitModel unit) {
+        if (parents.isEmpty()) {
+            return Option.none();
         }
-
-        if (father.isPresent()) {
-            var computedBirthDate = setBirthDateByParent(father.get().birthDate);
-            return Option.of(unit.copy(computedBirthDate));
-        }
-
-        return Option.none();
+        var computedBirthDate = setBirthDateByParent(parents.head().birthDate);
+        return Option.of(unit.copy(computedBirthDate, true));
     }
 
-    public Option<UnitModel> defineBirthDateByOldestChild(UnitModel unit, List<UnitModel> children) {
+    public Option<UnitModel> defineBirthDateByOldestChild(List<UnitModel> children, UnitModel unit) {
         if (children.isEmpty()) {
             return Option.none();
         }
         var computedBirthDate = setBirthDateByChild(children.head().birthDate);
-        return Option.of(unit.copy(computedBirthDate));
+        return Option.of(unit.copy(computedBirthDate, true));
     }
 
     public LocalDate setBirthDateByParent(LocalDate birthDate) {
-        return birthDate.plusMonths(4);
+        return birthDate.plusMonths(_command.getTimeDistance());
     }
 
     public LocalDate setBirthDateByChild(LocalDate birthDate) {

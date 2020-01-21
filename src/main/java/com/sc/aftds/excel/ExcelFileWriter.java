@@ -1,5 +1,7 @@
 package com.sc.aftds.excel;
 
+import com.sc.aftds.unit.IUnitEngine;
+import com.sc.aftds.unit.IUnitService;
 import com.sc.aftds.unit.UnitModel;
 import io.vavr.collection.List;
 import io.vavr.control.Try;
@@ -24,10 +26,12 @@ public class ExcelFileWriter implements IExcelFileWriter {
     private static String fileName = "database.xlsx";
 
     private final List<UnitModel> _unitModels;
+    private final IUnitService _unitService;
     private final DateTimeFormatter _dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    public ExcelFileWriter(List<UnitModel> unitModels) {
+    public ExcelFileWriter(List<UnitModel> unitModels, IUnitService unitService) {
         _unitModels = unitModels;
+        _unitService = unitService;
     }
 
     @Override
@@ -59,16 +63,23 @@ public class ExcelFileWriter implements IExcelFileWriter {
     }
 
     public Row writeUnitModelIntoRow(Row row, UnitModel unitModel) {
+        var mother = _unitService.findUnitById(unitModel.motherId);
+        var father = _unitService.findUnitById(unitModel.fatherId);
         row.createCell(Column.Id.PositionWrite).setCellValue(unitModel.id);
         row.createCell(Column.BirthDate.PositionWrite).setCellValue(_dateTimeFormatter.format(unitModel.birthDate));
         row.createCell(Column.FatherId.PositionWrite).setCellValue(unitModel.fatherId);
+        father.peek(x -> row.createCell(Column.FatherBirthDate.PositionWrite)
+                .setCellValue(_dateTimeFormatter.format(x.birthDate)));
         row.createCell(Column.MotherId.PositionWrite).setCellValue(unitModel.motherId);
+        mother.peek(x -> row.createCell(Column.MotherBirthDate.PositionWrite)
+                .setCellValue(_dateTimeFormatter.format(x.birthDate)));
         row.createCell(Column.Name.PositionWrite).setCellValue(unitModel.name);
         row.createCell(Column.Sex.PositionWrite).setCellValue(unitModel.sex.name());
         row.createCell(Column.Ems.PositionWrite).setCellValue(unitModel.ems);
         row.createCell(Column.PawPeds.PositionWrite).setCellValue(unitModel.pawPeds);
         row.createCell(Column.Pl.PositionWrite).setCellValue(unitModel.pl);
         row.createCell(Column.Ru.PositionWrite).setCellValue(unitModel.ru);
+        row.createCell(Column.ModifiedByProgram.PositionWrite).setCellValue(unitModel.modifiedByProgram);
         return row;
     }
 
