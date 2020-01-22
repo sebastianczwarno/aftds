@@ -1,16 +1,12 @@
 package com.sc.aftds.excel;
 
-import com.sc.aftds.unit.IUnitEngine;
 import com.sc.aftds.unit.IUnitService;
 import com.sc.aftds.unit.UnitModel;
 import io.vavr.collection.List;
 import io.vavr.control.Try;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileNotFoundException;
@@ -18,8 +14,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
-import static io.vavr.Predicates.*;
 import static io.vavr.API.*;
+import static io.vavr.Predicates.instanceOf;
 
 public class ExcelFileWriter implements IExcelFileWriter {
     private static final Logger logger = LogManager.getLogger(ExcelFileWriter.class);
@@ -39,8 +35,10 @@ public class ExcelFileWriter implements IExcelFileWriter {
         logger.info("Begin writing information into " + fileName);
         var workbook = new XSSFWorkbook();
         var sheet = workbook.createSheet("database");
+        var cellStyle = workbook.createCellStyle();
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         createHeaderRow(sheet);
-        createRecordsInSheet(sheet);
+        createRecordsInSheet(sheet, cellStyle);
         commit(workbook);
         logger.info("Completed writing information into " + fileName);
     }
@@ -53,11 +51,14 @@ public class ExcelFileWriter implements IExcelFileWriter {
         }
     }
 
-    public void createRecordsInSheet(Sheet sheet) {
+    public void createRecordsInSheet(Sheet sheet, CellStyle cellStyle) {
         for (int i = 0; i < _unitModels.size(); i++) {
             var unitModel = _unitModels.get(i);
             var rowPosition = i + 1;
             var row = sheet.createRow(rowPosition);
+            if (unitModel.modifiedByProgram) {
+                row.setRowStyle(cellStyle);
+            }
             writeUnitModelIntoRow(row, unitModel);
         }
     }
